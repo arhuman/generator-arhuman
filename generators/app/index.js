@@ -4,37 +4,78 @@ var chalk = require('chalk');
 var yosay = require('yosay');
 
 module.exports = yeoman.generators.Base.extend({
-  prompting: function () {
-    var done = this.async();
+
+  // Configurations will be loaded here.
+  // Ask for user input
+  prompting: function() {
 
     // Have Yeoman greet the user.
     this.log(yosay(
-      'Welcome to the sweet ' + chalk.red('generator-arhuman') + ' generator!'
+      'Welcome to the legendary ' + chalk.red('generator-arhuman') + ' generator!'
     ));
 
-    var prompts = [{
-      type: 'confirm',
-      name: 'someOption',
-      message: 'Would you like to enable this option?',
-      default: true
-    }];
-
-    this.prompt(prompts, function (props) {
-      this.props = props;
-      // To access props later use this.props.someOption;
-
+    var done = this.async();
+    var prompts = [
+      {
+        type: 'input',
+        name: 'name',
+        message: 'Your project name',
+        // Defaults to the project's folder name if the input is skipped
+        default: this.appname
+      },
+      {
+        type: 'list',
+        name: 'type',
+        message: 'What do you want?',
+        choices: [
+              {
+                name: 'Command line application',
+                value: 'cli'
+              },
+              {
+                name: 'Express app',
+                value: 'express'
+              },
+              {
+                name: 'ES2015 Class',
+                value: 'class6'
+              }
+            ],
+        // Defaults to the project's folder name if the input is skipped
+        default: 'express'
+      }
+    ];
+    this.prompt( prompts, function(answers) {
+      this.props = answers;
       done();
     }.bind(this));
   },
 
-  writing: function () {
-    this.fs.copy(
-      this.templatePath('dummyfile.txt'),
-      this.destinationPath('dummyfile.txt')
-    );
-  },
+  // Writing Logic here
+  writing: {
+    // Copy the configuration files
+    config: function() {
+      if (this.props.type == 'cli') {
+        this.composeWith('arhuman:cli', { options: { name: this.props.name } }, { local: require.resolve('../cli') });
+      } else if (this.props.type == 'class6') {
+        this.composeWith('arhuman:class6', { options: { name: this.props.name } }, { local: require.resolve('../class6') });
+      } else if (this.props.type == 'express') {
+        this.composeWith('arhuman:express', { options: { name: this.props.name } }, { local: require.resolve('../express') });
+      }
+    },
 
-  install: function () {
+    // Copy application files
+    app: function() {
+      if (this.props.type == 'cli') {
+        this.composeWith('arhuman:cli', { options: { name: this.props.name } }, { local: require.resolve('../cli') });
+      } else if (this.props.type == 'class6') {
+        this.composeWith('arhuman:class6', { options: { name: this.props.name } }, { local: require.resolve('../class6') });
+      } else if (this.props.type == 'express') {
+        this.composeWith('arhuman:express', { options: { name: this.props.name } }, { local: require.resolve('../express') });
+      }
+    }
+  },
+  install: function() {
     this.installDependencies();
   }
 });
